@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/Azure/skewer"
 	"io"
 	"net/http"
 	"strings"
@@ -1205,22 +1204,14 @@ var _ = Describe("InstanceType Provider", func() {
 
 var _ = Describe("Tax Calculator", func() {
 	Context("KubeReservedResources", func() {
-		var sku *skewer.SKU
-		D8C32GB := "Standard_D8ads_v5"
-		D16C64GB := "Standard_D16ads_v5"
-		D32C128GB := "Standard_D32ads_v5"
-		var nodeClassSpec *v1alpha2.AKSNodeClassSpec
+		It("should have 4 cores, 7GiB", func() {
+			cpus := int64(4) // 4 cores
+			memory := 7.0    // 7 GiB
+			expectedCPU := "140m"
+			expectedMemory := "1750Mi"
+			maxPods := int64(100)
 
-		BeforeEach(func() {
-			*nodeClassSpec.MaxPods = 50
-		})
-
-		It("should have 8 cores, 32GiB", func() {
-			sku.Name = &D8C32GB
-			expectedCPU := "180m"
-			expectedMemory := "1150Mi"
-
-			resources := instancetype.KubeReservedResources(sku, nodeClassSpec)
+			resources := instancetype.KubeReservedResources(cpus, memory, maxPods)
 			gotCPU := resources[v1.ResourceCPU]
 			gotMemory := resources[v1.ResourceMemory]
 
@@ -1228,12 +1219,14 @@ var _ = Describe("Tax Calculator", func() {
 			Expect(gotMemory.String()).To(Equal(expectedMemory))
 		})
 
-		It("should have 16 cores, 64GiB", func() {
-			sku.Name = &D16C64GB
-			expectedCPU := "260m"
-			expectedMemory := "1150Mi"
+		It("should have 2 cores, 8GiB", func() {
+			cpus := int64(2) // 2 cores
+			memory := 8.0    // 8 GiB
+			expectedCPU := "100m"
+			expectedMemory := "550Mi"
+			maxPods := int64(20)
 
-			resources := instancetype.KubeReservedResources(sku, nodeClassSpec)
+			resources := instancetype.KubeReservedResources(cpus, memory, maxPods)
 			gotCPU := resources[v1.ResourceCPU]
 			gotMemory := resources[v1.ResourceMemory]
 
@@ -1241,12 +1234,14 @@ var _ = Describe("Tax Calculator", func() {
 			Expect(gotMemory.String()).To(Equal(expectedMemory))
 		})
 
-		It("should have 32 cores, 128GiB", func() {
-			sku.Name = &D32C128GB
-			expectedCPU := "420m"
+		It("should have 3 cores, 64GiB", func() {
+			cpus := int64(3) // 3 cores
+			memory := 64.0   // 64 GiB
+			expectedCPU := "120m"
 			expectedMemory := "1150Mi"
+			maxPods := int64(50)
 
-			resources := instancetype.KubeReservedResources(sku, nodeClassSpec)
+			resources := instancetype.KubeReservedResources(cpus, memory, maxPods)
 			gotCPU := resources[v1.ResourceCPU]
 			gotMemory := resources[v1.ResourceMemory]
 
